@@ -12,6 +12,10 @@ class Product:
             raise NegativeQuantityError("Количество не может быть равным или меньше 0")
         self.quantity=quantity
 
+    def apply_discount(self):
+        if self.price > 3000:
+            return True
+        return False
 
     def sell(self, amount):
         if self.quantity > amount:
