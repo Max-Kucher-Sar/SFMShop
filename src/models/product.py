@@ -30,6 +30,10 @@ class Product:
     def get_total_price(self):
         return self.price * self.quantity
 
+    def calculate_shipping(self):
+        total_price = self.get_total_price()
+        return total_price * 0.1
+
     def disgard_purchase(self, amount):
         self.quantity += amount
         return True
