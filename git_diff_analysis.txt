@@ -1,0 +1,9 @@
+Команда git diff main feature/add-logging и
+команда git diff main feature/add-caching
+вывели информацию о разнице между основной веткой main и
+ветками feature/add-logging feature/add-caching.
+В основной ветке отсутствуют следующие изменения:
+    1) файл /src/utils/cache.py с содержимым # Будущий модуль для кэширования
+        из ветки feature/add-caching
+    2) файл /src/utils/logger.py с содержимым # Будущий модуль для логгирования
+        из ветки feature/add-logging

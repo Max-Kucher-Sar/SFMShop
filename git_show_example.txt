@@ -1,0 +1,33 @@
+commit a09f424affdb7ccab4e8993755100213e392f273
+Author: Пользователь <kucherenko.max75@email.ru>
+Date:   Tue Apr 21 15:08:30 2026 +0400
+
+    Добавлен новый метод disgard_purchase в класс Product
+
+diff --git a/src/main.py b/src/main.py
+index 95b6711..682d24b 100644
+--- a/src/main.py
++++ b/src/main.py
+@@ -48,6 +48,5 @@ def process_order_system():
+     except NegativePriceError as e:
+         print("Ошибка валидации:", e)
+
+-    #Тестируем rebase
+
+ process_order_system()
+\ No newline at end of file
+diff --git a/src/models/product.py b/src/models/product.py
+index 8f39150..ef001b0 100644
+--- a/src/models/product.py
++++ b/src/models/product.py
+@@ -30,6 +30,10 @@ class Product:
+     def get_total_price(self):
+         return self.price * self.quantity
+
++    def disgard_purchase(self, amount):
++        self.quantity += amount
++        return True
++
+     def __lt__(self, other):
+         if not isinstance(other, Product):
+             return NotImplemented
