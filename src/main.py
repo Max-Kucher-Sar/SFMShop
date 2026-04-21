@@ -48,4 +48,6 @@ def process_order_system():
     except NegativePriceError as e:
         print("Ошибка валидации:", e)
 
+    #Тестируем rebase
+
 process_order_system()
