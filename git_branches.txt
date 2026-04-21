@@ -1,0 +1,5 @@
+feature/add-inventory-management
+feature/add-shipping
+feature/test-rebase
+* main
+master

@@ -1,0 +1,57 @@
+commit a09f424affdb7ccab4e8993755100213e392f273 (HEAD -> main)
+Author: Пользователь <kucherenko.max75@email.ru>
+Date:   Tue Apr 21 15:08:30 2026 +0400
+
+    Добавлен новый метод disgard_purchase в класс Product
+
+ src/main.py           | 1 -
+ src/models/product.py | 4 ++++
+ 2 files changed, 4 insertions(+), 1 deletion(-)
+
+commit 5f753aee3b609550a6478cfb58d978909ea9fb04
+Author: Пользователь <kucherenko.max75@email.ru>
+Date:   Tue Apr 21 14:49:14 2026 +0400
+
+    тестируем rebase123
+
+ src/main.py | 2 ++
+ 1 file changed, 2 insertions(+)
+
+commit 0ab8e8ddb91eb01c314a1b2cac1a2b8231bd652a (origin/main)
+Author: Пользователь <kucherenko.max75@email.ru>
+Date:   Mon Apr 6 21:39:56 2026 +0400
+
+    Добавлена система скидок в класс Product
+
+ src/models/product.py | 4 ++++
+ 1 file changed, 4 insertions(+)
+
+commit a660c43484957e5899339e6a87eb61588e391fd6 (master)
+Author: Пользователь <kucherenko.max75@email.ru>
+Date:   Mon Apr 6 21:38:04 2026 +0400
+
+    Добавлены уроки блока 2: ООП
+
+ .gitignore               |  2 ++
+ src/__init__.py          |  0
+ src/main.py              | 51 ++++++++++++++++++++++++++++++++++++++++++++++++
+ src/models/__init__.py   |  0
+ src/models/exceptions.py | 35 +++++++++++++++++++++++++++++++++
+ src/models/order.py      | 27 +++++++++++++++++++++++++
+ src/models/payment.py    | 23 ++++++++++++++++++++++
+ src/models/product.py    | 43 ++++++++++++++++++++++++++++++++++++++++
+ src/models/user.py       | 20 +++++++++++++++++++
+ src/requirements.txt     |  0
+ 10 files changed, 201 insertions(+)
+
+commit 121ba74d652c6bc693db5ae7b61ee6d89ec1d9a5
+Author: Пользователь <kucherenko.max75@email.ru>
+Date:   Mon Apr 6 21:35:05 2026 +0400
+
+    Добавлены уроки блока 1: основы Python
+
+ src/utils/__init__.py        |  0
+ src/utils/calculations.py    | 32 +++++++++++++++
+ src/utils/order_processor.py | 96 ++++++++++++++++++++++++++++++++++++++++++++
+ src/utils/validators.py      |  9 +++++
+ 4 files changed, 137 insertions(+)

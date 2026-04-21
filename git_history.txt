@@ -1,0 +1,23 @@
+* 92846c1 (origin/feature/add-shipping, feature/add-shipping) Добавлен метод calculate_shipping в Product
+* a09f424 (HEAD -> main) Добавлен новый метод disgard_purchase в класс Product
+| * 41c48c9 (feature/test-rebase) тестируем rebase
+| * de6e79b Добавлены методы управления складом в класс Product
+|/
+* 5f753ae тестируем rebase123
+| * 7765043 (origin/feature/add-inventory-management, feature/add-inventory-management) Добавлены методы управления складом в класс Product
+|/
+* 0ab8e8d (origin/main) Добавлена система скидок в класс Product
+* a660c43 (master) Добавлены уроки блока 2: ООП
+* 121ba74 Добавлены уроки блока 1: основы Python
+PS C:\Users\User\Desktop\local\SFMShop> git log --oneline --graph --all
+* 92846c1 (origin/feature/add-shipping, feature/add-shipping) Добавлен метод calculate_shipping в Product
+* a09f424 (HEAD -> main) Добавлен новый метод disgard_purchase в класс Product
+| * 41c48c9 (feature/test-rebase) тестируем rebase
+| * de6e79b Добавлены методы управления складом в класс Product
+|/
+* 5f753ae тестируем rebase123
+| * 7765043 (origin/feature/add-inventory-management, feature/add-inventory-management) Добавлены методы управления складом в класс Product
+|/
+* 0ab8e8d (origin/main) Добавлена система скидок в класс Product
+* a660c43 (master) Добавлены уроки блока 2: ООП
+* 121ba74 Добавлены уроки блока 1: основы Python
