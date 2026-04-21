@@ -10,7 +10,14 @@ class Product:
 
         if quantity <= 0:
             raise NegativeQuantityError("Количество не может быть равным или меньше 0")
-        self.quantity=quantity
+        self.quantity = quantity
+
+    def check_stock(self) -> int:
+        return self.quantity
+
+    def update_stock(self, amount) -> int:
+        self.quantity += amount
+        return self.quantity
 
     def apply_discount(self):
         if self.price > 3000:
