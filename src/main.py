@@ -48,4 +48,5 @@ def process_order_system():
     except NegativePriceError as e:
         print("Ошибка валидации:", e)
 
+
 process_order_system()
