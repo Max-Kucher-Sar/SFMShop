@@ -7,6 +7,11 @@ NegativePriceError, InsufficientStockError,
 ValidationError, InvalidOrderError, NegativeQuantityError, InvalidProductError
 )
 
+from database.connection import (
+connect_to_db, add_product, get_all_products, update_product_price,
+create_user, get_user_by_id, create_order, get_user_orders
+)
+
 def process_order_system():
     user = User("Иван", "ivan@test.com")
 
@@ -49,4 +54,25 @@ def process_order_system():
         print("Ошибка валидации:", e)
 
 
-process_order_system()
+# process_order_system()
+
+conn = connect_to_db()
+try:
+    create_user(conn, 'Иван', 'ivan@test.ru')
+    print('Пользователь создан: Иван, ivan@test.ru')
+
+    user = get_user_by_id(conn, 1)
+    print('Пользователь найден:', user)
+
+    user_id = 1
+    total = 50000.00
+    create_order(conn, user_id, total)
+    print(f'Заказ создан: user_id={user_id}, total={total}')
+
+    orders = get_user_orders(conn, 1)
+    print('Заказы пользователя: ', orders)
+
+
+finally:
+    conn.close()
+

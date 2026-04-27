@@ -33,3 +33,15 @@ class InvalidOrderError(BusinessLogicError):
 class InvalidProductError(BusinessLogicError):
     """Товар невалиден"""
     pass
+
+class InsertError(DatabaseError):
+    """Ошибка добавления записи в БД"""
+    pass
+
+class UpdateError(DatabaseError):
+    """Ошибка изменения записи в БД"""
+    pass
+
+class SelectError(DatabaseError):
+    """Ошибка запросов на получение в БД"""
+    pass
