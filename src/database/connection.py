@@ -91,3 +91,15 @@ def get_user_orders(conn, user_id):
             return cursor.fetchone()
     except Exception as e:
         raise SelectError(f"Ошибка получения записи из таблицы users по id = {user_id}: {e}")
+
+def create_order_item(conn, order_id, product_id, quantity, price):
+    try:
+        with conn:
+            with conn.cursor() as cursor:
+                cursor.execute(
+                    "INSERT INTO order_items (order_id, product_id, quantity, price) VALUES (%s, %s)",
+                    (order_id, product_id, quantity, price)
+                )
+        return True
+    except Exception as e:
+        raise InsertError(f'Ошибка добавления записи в таблицу users: {e}')
