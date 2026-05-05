@@ -2,7 +2,7 @@ import os
 import psycopg2
 from dotenv import load_dotenv
 from src.models.exceptions import (
-InsertError, UpdateError, SelectError
+InsertError, UpdateError, SelectError, DeleteError
 )
 
 load_dotenv()
@@ -65,7 +65,8 @@ def get_user_by_id(conn, user_id):
                 "SELECT * FROM users WHERE id = %s",
                 (user_id, )
             )
-            return cursor.fetchone()
+            res = cursor.fetchone()
+            return res
     except Exception as e:
         raise SelectError(f"Ошибка получения записи из таблицы users по id = {user_id}: {e}")
 
@@ -103,3 +104,15 @@ def create_order_item(conn, order_id, product_id, quantity, price):
         return True
     except Exception as e:
         raise InsertError(f'Ошибка добавления записи в таблицу users: {e}')
+
+def delete_order(conn, order_id):
+    try:
+        with conn:
+            with conn.cursor() as cursor:
+                cursor.execute(
+                    "DELETE FROM orders WHERE id = %s",
+                    (order_id, )
+                )
+        return True
+    except Exception as e:
+        raise DeleteError(f'Ошибка удаления записи в таблице orders: {e}')

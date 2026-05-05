@@ -45,3 +45,7 @@ class UpdateError(DatabaseError):
 class SelectError(DatabaseError):
     """Ошибка запросов на получение в БД"""
     pass
+
+class DeleteError(DatabaseError):
+    """Ошибка запросов на удаление в БД"""
+    pass
