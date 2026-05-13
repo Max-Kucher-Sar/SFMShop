@@ -7,16 +7,20 @@ InsertError, UpdateError, SelectError, DeleteError
 
 load_dotenv()
 
-conn = psycopg2.connect(
-    host="localhost",
-    port="5433",
-    database="postgres",
-    user="postgres",
-    password=os.getenv("pswd", "password")
-    )
+
 
 def connect_to_db():
-    return conn
+    conn = psycopg2.connect(
+        host="localhost",
+        port="5433",
+        database="postgres",
+        user="postgres",
+        password=os.getenv("pswd", "password")
+    )
+    try:
+        yield conn
+    finally:
+        conn.close()
 
 def add_product(conn, name, price, quantity):
     with conn:
@@ -27,12 +31,28 @@ def add_product(conn, name, price, quantity):
             )
     return True
 
-def get_all_products(conn):
-    with conn.cursor() as cursor:
-        cursor.execute(
-            "SELECT * FROM products"
-        )
-        return cursor.fetchall()
+def get_all_products(conn, limit, offset):
+    try:
+        with conn.cursor() as cursor:
+            cursor.execute(
+                "SELECT * FROM products ORDER BY id LIMIT %s OFFSET %s",
+                (limit, offset)
+            )
+            return cursor.fetchall()
+    except Exception as e:
+        raise SelectError(f"Ошибка получения записей из таблицы products: {e}")
+
+def get_product_by_id(conn, product_id):
+    try:
+        with conn.cursor() as cursor:
+            cursor.execute(
+                "SELECT * FROM products WHERE id = %s",
+                (product_id, )
+            )
+            res = cursor.fetchone()
+            return res
+    except Exception as e:
+        raise SelectError(f"Ошибка получения записи из таблицы products по id = {product_id}: {e}")
 
 def update_product_price(conn, product_id, new_price):
     try:
@@ -58,6 +78,16 @@ def create_user(conn, name, email):
     except Exception as e:
         raise InsertError(f'Ошибка добавления записи в таблицу users: {e}')
 
+def get_all_users(conn):
+    try:
+        with conn.cursor() as cursor:
+            cursor.execute(
+                "SELECT * FROM users"
+            )
+            return cursor.fetchall()
+    except Exception as e:
+        raise SelectError(f"Ошибка получения записей из таблицы users: {e}")
+
 def get_user_by_id(conn, user_id):
     try:
         with conn.cursor() as cursor:
@@ -70,13 +100,13 @@ def get_user_by_id(conn, user_id):
     except Exception as e:
         raise SelectError(f"Ошибка получения записи из таблицы users по id = {user_id}: {e}")
 
-def create_order(conn, user_id, total):
+def create_order(conn, user_id, product_id, quantity):
     try:
         with conn:
             with conn.cursor() as cursor:
                 cursor.execute(
-                    "INSERT INTO orders (user_id, total) VALUES (%s, %s)",
-                    (user_id, total)
+                    "INSERT INTO orders (user_id, product_id, quantity) VALUES (%s, %s)",
+                    (user_id, product_id, quantity)
                 )
         return True
     except Exception as e:
