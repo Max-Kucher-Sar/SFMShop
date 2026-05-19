@@ -15,7 +15,8 @@ def connect_to_db():
         port="5433",
         database="postgres",
         user="postgres",
-        password=os.getenv("pswd", "password")
+        # password=os.getenv("pswd", "password")
+        password="1234"
     )
     try:
         yield conn
@@ -65,6 +66,20 @@ def update_product_price(conn, product_id, new_price):
                 return True
     except Exception as e:
         raise UpdateError(f"Ошибка обновления записи из products products по id = {product_id}: {e}")
+
+def update_product(conn, data, id):
+    try:
+        with conn:
+            with conn.cursor() as cursor:
+                cursor.execute(
+                    "UPDATE products SET name = %s, price = %s, quantity = %s WHERE id = %s",
+                    (data.name, data.price, data.quantity, id)
+                )
+                if cursor.rowcount == 0:
+                    return False
+                return True
+    except Exception as e:
+        raise UpdateError(f"Ошибка обновления записи из products по id = {id}: {e}")
 
 def create_user(conn, name, email):
     try:
@@ -146,3 +161,17 @@ def delete_order(conn, order_id):
         return True
     except Exception as e:
         raise DeleteError(f'Ошибка удаления записи в таблице orders: {e}')
+
+def delete_product_by_id(conn, id):
+    try:
+        with conn:
+            with conn.cursor() as cursor:
+                cursor.execute(
+                    "DELETE FROM products WHERE id = %s",
+                    (id,)
+                )
+                if cursor.rowcount == 0:
+                    return False
+                return True
+    except Exception as e:
+        raise DeleteError(f"Ошибка удаления товара с id = {id}: {e}")
