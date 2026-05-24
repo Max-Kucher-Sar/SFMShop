@@ -68,7 +68,8 @@ def measure_difference():
     #Замеряем время выполнения поиска в словаре по example_id
     products_dict = create_product_dict(products_list)
     time_start = time.time()
-    products_dict.get(str(example_id))
+    # products_dict = {product['id']: product for product in products_list}
+    products_dict.get(example_id)
     time_fin = time.time()
     time_diff_product_dict = time_fin - time_start
     print(f"Время выполнения поиска в словаре: {time_diff_product_dict}")
