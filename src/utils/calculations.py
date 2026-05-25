@@ -32,15 +32,8 @@ def get_discount_by_total(total):
             f'ожидает - (int, float)'
         )
 
-def find_product_in_list(products: list, product_id: int) -> dict | None:
-    """Поиск в списке (медленный)"""
-    for product in products:
-        if product['id'] == product_id:
-            return product
-    return None
-
 def create_product_dict(products: list) -> dict:
-    """Поиск в словаре (медленный)"""
+    """Поиск в словаре"""
     return {product['id']: product for product in products}
 
 def create_product_list() -> list:
@@ -53,7 +46,14 @@ def create_product_list() -> list:
         res.append(info)
     return res
 
-def measure_difference():
+def find_product_in_list(products: list, product_id: int) -> dict | None:
+    """Поиск в списке (медленный)"""
+    for product in products:
+        if product['id'] == product_id:
+            return product
+    return None
+
+def measure_list_dict_difference():
     example_id = 989
 
     products_list = create_product_list()
@@ -68,7 +68,6 @@ def measure_difference():
     #Замеряем время выполнения поиска в словаре по example_id
     products_dict = create_product_dict(products_list)
     time_start = time.time()
-    # products_dict = {product['id']: product for product in products_list}
     products_dict.get(example_id)
     time_fin = time.time()
     time_diff_product_dict = time_fin - time_start
@@ -77,6 +76,6 @@ def measure_difference():
     result = time_diff_product_list / time_diff_product_dict
     print(f"Разница во времени между поиском в списке и поиском в словаре = {result}")
 
-measure_difference()
+
 
 

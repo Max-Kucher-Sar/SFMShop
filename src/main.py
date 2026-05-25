@@ -65,7 +65,7 @@ def bubble_sort(orders_list):
             if orders_list[j]['created_at'] > orders_list[j+1]['created_at']:
                 orders_list[j], orders_list[j+1] = orders_list[j+1], orders_list[j]
 
-def measure_difference():
+def measure_sort_difference():
     orders_list = create_orders_list()
 
     # Замеряем время выполнения ручной (пузырьковой) сортировки
@@ -90,4 +90,27 @@ def measure_difference():
     И чаще всего, встроенные методы в python работают быстрее, чем руками написанный код
     """
 
-measure_difference()
+
+
+from utils.calculations import measure_list_dict_difference
+
+
+from utils.generators import measuring_extra_cycles
+
+def benchmark_optimizations():
+    """Измерить производительность оптимизированных функций"""
+    print('Производительность оптимизированных функций:')
+    print('-' * 100)
+
+    # Функция для сравнения линейного поиска на поиск в словарях
+    measure_list_dict_difference()
+    print('*' * 100)
+
+    # Функция для сравнения расчета по циклам и вложенной функции
+    measuring_extra_cycles()
+    print('*' * 100)
+
+    #Функция для сравнения ручной сортировки с методом sorted()
+    measure_sort_difference()
+
+benchmark_optimizations()
