@@ -3,14 +3,40 @@ from .exceptions import NegativePriceError, NegativeQuantityError, InsufficientS
 class Product:
     def __init__(self, name, price, quantity):
         self.name = name
-
-        if price < 0:
-            raise NegativePriceError("Цена не может быть отрицательной")
         self.price=price
-
-        if quantity <= 0:
-            raise NegativeQuantityError("Количество не может быть равным или меньше 0")
         self.quantity=quantity
+
+    @classmethod
+    def from_dict(cls, data: dict):
+        return cls(
+            name=data['name'],
+            price=data['price'],
+            quantity=data['quantity']
+        )
+
+    @staticmethod
+    def calculate_discount(price: int, discount: float):
+        return price * (1 - discount / 100)
+
+    @property
+    def price(self):
+        return self._price
+
+    @price.setter
+    def price(self, value: int):
+        if value < 0:
+            raise NegativePriceError("Цена не может быть отрицательной")
+        self._price = value
+
+    @property
+    def quantity(self):
+        return self._quantity
+
+    @quantity.setter
+    def quantity(self, value):
+        if value <= 0:
+            raise NegativeQuantityError("Количество не может быть равным или меньше 0")
+        self._quantity = value
 
     def apply_discount(self):
         if self.price > 3000:
