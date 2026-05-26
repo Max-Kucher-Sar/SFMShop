@@ -1,19 +1,26 @@
-from models.product import Product
+class A:
+    def method(self):
+        print("A.method()")
 
-product1 = Product('Ноутбук', 15000, 10)
+class B(A):
+    def method(self):
+        print("B.method()")
+        super().method()
 
-product_info = {
-    'name': 'Клавиатура',
-    'price': 1500,
-    'quantity': 18
-}
-product2 = Product.from_dict(product_info)
+class C(A):
+    def method(self):
+        print("C.method()")
+        super().method()
 
-print('Объект с классическим инициализатором:', product1)
-print('Объект, созданный через декоратор classmethod:', product2)
+class D(B, C):
+    def method(self):
+        print("D.method()")
+        super().method()
 
-total_discount1 = product1.calculate_discount(product1.price, 20)
-total_discount2 = Product.calculate_discount(10000, 50)
-
-print("Итоговая сумма с учетом скидки полученная от экземпляра:", total_discount1)
-print("Итоговая сумма с учетом скидки полученная от класса:", total_discount2)
+print(D.mro())
+"""
+Python использует алгоритм C3 Linearization для определения MRO. Когда мы вызываем метод
+method() у класса D внутри которой используется функция super(), Python делегирует вызов 
+функции следующему классу в MRO. В данном случае MRO у класса D следующий:
+[<class 'D'>, <class 'B'>, <class 'C'>, <class 'A'>, <class 'object'>].
+"""
