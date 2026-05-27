@@ -1,10 +1,19 @@
 from .exceptions import NegativePriceError, NegativeQuantityError, InsufficientStockError
+from .mixins import LoggableMixin, SerializableMixin, ValidatableMixin
 
-class Product:
+class Product(LoggableMixin, SerializableMixin, ValidatableMixin):
     def __init__(self, name, price, quantity):
         self.name = name
         self.price=price
         self.quantity=quantity
+        self.log(f"Создан товар: {self.name}")
+
+    def validate(self):
+        if self.price < 0:
+            raise NegativePriceError("Цена не может быть отрицательной")
+        if self.quantity <= 0:
+            raise NegativeQuantityError("Количество не может быть равным или меньше 0")
+        return True
 
     @classmethod
     def from_dict(cls, data: dict):

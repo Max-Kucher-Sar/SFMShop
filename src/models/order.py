@@ -1,21 +1,23 @@
 from .exceptions import InvalidOrderError, InvalidProductError, NegativeQuantityError
 from .product import Product
 from datetime import datetime
+from .mixins import LoggableMixin, SerializableMixin, ValidatableMixin
 
-class Order:
+class Order(LoggableMixin, SerializableMixin, ValidatableMixin):
     def __init__(self, order_id: int, created_at: str, quantity: int):
         self.order_id = order_id
-        # self.user = user
-
-        # if not products:
-        #     raise InvalidOrderError("Пустой список товаров")
-        # self.products = products
 
         if quantity <= 0:
             raise NegativeQuantityError("Количество не может быть равным или меньше 0")
         self.quantity=quantity
 
         self.created_at = datetime.strptime(created_at, "%Y-%m-%d")
+        self.log(f"Создан заказ с id={self.order_id}")
+
+    def validate(self):
+        if self.quantity <= 0:
+            raise NegativeQuantityError("Количество не может быть равным или меньше 0")
+        return True
 
     def add_product(self, product):
         if not isinstance(product, Product):

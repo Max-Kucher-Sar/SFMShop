@@ -1,26 +1,15 @@
-class A:
-    def method(self):
-        print("A.method()")
+from models.product import Product
+from models.order import Order
 
-class B(A):
-    def method(self):
-        print("B.method()")
-        super().method()
 
-class C(A):
-    def method(self):
-        print("C.method()")
-        super().method()
+product = Product("Ноутбук", 15000, 20)
+print(product.is_valid())
+print(product.to_json())
 
-class D(B, C):
-    def method(self):
-        print("D.method()")
-        super().method()
+print('-' * 50)
+print("Тестируем воздействие миксинов на класс Order")
+print('-' * 50)
 
-print(D.mro())
-"""
-Python использует алгоритм C3 Linearization для определения MRO. Когда мы вызываем метод
-method() у класса D внутри которой используется функция super(), Python делегирует вызов 
-функции следующему классу в MRO. В данном случае MRO у класса D следующий:
-[<class 'D'>, <class 'B'>, <class 'C'>, <class 'A'>, <class 'object'>].
-"""
+order = Order(1, "2026-05-27", 5)
+print(order.is_valid())
+print(order.to_json())
