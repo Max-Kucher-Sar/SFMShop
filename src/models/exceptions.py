@@ -18,6 +18,11 @@ class NegativePriceError(ValidationError):
     """Отрицательная цена"""
     pass
 
+class NegativeProductsError(ValidationError):
+    """Отрицательная цена"""
+    pass
+
+
 class NegativeQuantityError(ValidationError):
     """Неверное количество"""
     pass
