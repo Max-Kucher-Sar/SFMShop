@@ -3,6 +3,8 @@ from .mixins import LoggableMixin, SerializableMixin, ValidatableMixin
 from abc import ABC, abstractmethod
 from typing import Optional
 from .metaclasses import ModelMeta
+from .descriptors import PositiveNumber
+from .descriptors import CachedProperty
 
 class DiscountStrategy(ABC):
     @abstractmethod
@@ -24,6 +26,9 @@ class FixedDiscount(DiscountStrategy):
         return price - self.amount
 
 class Product(LoggableMixin, SerializableMixin, metaclass=ModelMeta):
+    price = PositiveNumber("_price")
+    quantity = PositiveNumber("_quantity")
+
     def __init__(self, name, price, quantity):
         self.name = name
         self.price=price
@@ -47,31 +52,12 @@ class Product(LoggableMixin, SerializableMixin, metaclass=ModelMeta):
     def calculate_discount(price: int, discount: float):
         return price * (1 - discount / 100)
 
-    @property
-    def price(self):
-        return self._price
-
-    @price.setter
-    def price(self, value: int):
-        if value < 0:
-            raise NegativePriceError("Цена не может быть отрицательной")
-        self._price = value
-
-    @property
-    def quantity(self):
-        return self._quantity
-
-    @quantity.setter
-    def quantity(self, value):
-        if value <= 0:
-            raise NegativeQuantityError("Количество не может быть равным или меньше 0")
-        self._quantity = value
-
     def sell(self, amount):
         if self.quantity > amount:
             raise InsufficientStockError(f'Не хватает {self.quantity - amount} товара на складе')
         self.quantity = self.quantity - amount
 
+    @CachedProperty
     def get_total_price(self):
         return self.price * self.quantity
 
