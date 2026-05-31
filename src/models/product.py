@@ -2,6 +2,7 @@ from .exceptions import NegativePriceError, NegativeQuantityError, InsufficientS
 from .mixins import LoggableMixin, SerializableMixin, ValidatableMixin
 from abc import ABC, abstractmethod
 from typing import Optional
+from .metaclasses import ModelMeta
 
 class DiscountStrategy(ABC):
     @abstractmethod
@@ -22,7 +23,7 @@ class FixedDiscount(DiscountStrategy):
     def apply(self, price: float) -> float:
         return price - self.amount
 
-class Product(LoggableMixin, SerializableMixin):
+class Product(LoggableMixin, SerializableMixin, metaclass=ModelMeta):
     def __init__(self, name, price, quantity):
         self.name = name
         self.price=price

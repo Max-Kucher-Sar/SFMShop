@@ -3,8 +3,9 @@ from .product import Product
 from datetime import datetime
 from .mixins import LoggableMixin, SerializableMixin, ValidatableMixin
 from typing import Optional
+from .metaclasses import ModelMeta
 
-class Order(LoggableMixin, SerializableMixin):
+class Order(LoggableMixin, SerializableMixin, metaclass=ModelMeta):
     def __init__(self, order_id: int, created_at: str, quantity: int, products: list[Product]):
         self.order_id = order_id
         self.quantity=quantity

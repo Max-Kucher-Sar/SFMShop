@@ -1,6 +1,8 @@
 import re
 from .exceptions import ValidationError
-class User:
+from .metaclasses import ModelMeta
+
+class User(metaclass=ModelMeta):
     def __init__(self, name, email):
         if not re.match(r".+@.+\..+", email):
             raise ValidationError("Неверный формат email")
