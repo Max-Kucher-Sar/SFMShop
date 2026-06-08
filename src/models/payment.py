@@ -1,4 +1,5 @@
 from abc import ABC, abstractmethod
+from .mixins import LoggableMixin, SerializableMixin
 
 class PaymentMethod(ABC):
     def __init__(self, payment_method):
@@ -14,10 +15,11 @@ class PaymentMethod(ABC):
         """Метод перевода"""
         pass
 
-class CardPayment(PaymentMethod):
+class CardPayment(LoggableMixin, SerializableMixin, PaymentMethod):
     def __init__(self):
         self.payment_method = 'card'
         super().__init__(self.payment_method)
+        self.log(f"Создан платеж card")
 
     def process_fee(self, amount: float) -> float:
         """Расчет комисии"""
@@ -72,3 +74,5 @@ class Payment:
         self.amount = amount
         self.payment_method = payment_method
         self.status = "pending"
+
+print(CardPayment.mro())

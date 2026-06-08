@@ -4,8 +4,8 @@ from abc import ABC, abstractmethod
 from typing import Optional
 from .metaclasses import ModelMeta
 from .descriptors import PositiveNumber, CachedProperty
-from ..service.database_service import Database
-from ..service.discount_service import DiscountStrategy
+from src.service.database_service import Database
+from src.service.discount_service import DiscountStrategy
 
 
 class Product(LoggableMixin, SerializableMixin, metaclass=ModelMeta):
@@ -59,3 +59,10 @@ class ProductRepo:
     def save_to_database(self, database: Database):
         database.save(self.product)
         return True
+
+product = Product("Ноутбук", 1000, 10)
+print(product.get_total_price)  # Вычисление... 10000
+print(product.get_total_price)
+
+print(ModelMeta._registry)
+print(product.to_dict())

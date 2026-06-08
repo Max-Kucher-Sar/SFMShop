@@ -1,6 +1,6 @@
 from typing import Optional
 from .notifications import Notification
-from ..service.database_service import Database
+from src.service.database_service import Database
 from .user import User
 from abc import ABC, abstractmethod
 

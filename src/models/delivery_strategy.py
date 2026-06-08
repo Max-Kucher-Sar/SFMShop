@@ -1,14 +1,14 @@
 from abc import ABC, abstractmethod
 
-class Delivery(ABC):
+class DeliveryStrategy(ABC):
     @abstractmethod
     def calculate_cost(self, distance: float) -> float:
         pass
 
-class StandardDelivery(Delivery):
+class StandardDelivery(DeliveryStrategy):
     def calculate_cost(self, distance: float) -> float:
         return distance * 10
 
-class ExpressDelivery(Delivery):
+class ExpressDelivery(DeliveryStrategy):
     def calculate_cost(self, distance: float) -> float:
         return distance * 20
