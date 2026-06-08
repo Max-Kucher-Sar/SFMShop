@@ -3,27 +3,10 @@ from .mixins import LoggableMixin, SerializableMixin, ValidatableMixin
 from abc import ABC, abstractmethod
 from typing import Optional
 from .metaclasses import ModelMeta
-from .descriptors import PositiveNumber
-from .descriptors import CachedProperty
+from .descriptors import PositiveNumber, CachedProperty
+from ..service.database_service import Database
+from ..service.discount_service import DiscountStrategy
 
-class DiscountStrategy(ABC):
-    @abstractmethod
-    def apply(self, price: float) -> float:
-        pass
-
-class PercentDiscount(DiscountStrategy):
-    def __init__(self, percent: float):
-        self.percent = percent
-
-    def apply(self, price: float) -> float:
-        return price * (1 - self.percent / 100)
-
-class FixedDiscount(DiscountStrategy):
-    def __init__(self, amount: float):
-        self.amount = amount
-
-    def apply(self, price: float) -> float:
-        return price - self.amount
 
 class Product(LoggableMixin, SerializableMixin, metaclass=ModelMeta):
     price = PositiveNumber("_price")
@@ -35,32 +18,9 @@ class Product(LoggableMixin, SerializableMixin, metaclass=ModelMeta):
         self.quantity=quantity
         self.log(f"Создан товар: {self.name}")
 
-    def calculate_price(self, discount: Optional[DiscountStrategy] = None) -> float | None:
-        if not discount:
-            return self.price
-        return discount.apply(self.price)
-
-    @classmethod
-    def from_dict(cls, data: dict):
-        return cls(
-            name=data['name'],
-            price=data['price'],
-            quantity=data['quantity']
-        )
-
-    @staticmethod
-    def calculate_discount(price: int, discount: float):
-        return price * (1 - discount / 100)
-
-    def sell(self, amount):
-        if self.quantity > amount:
-            raise InsufficientStockError(f'Не хватает {self.quantity - amount} товара на складе')
-        self.quantity = self.quantity - amount
-
     @CachedProperty
     def get_total_price(self):
         return self.price * self.quantity
-
 
     def __lt__(self, other):
         if not isinstance(other, Product):
@@ -77,3 +37,25 @@ class Product(LoggableMixin, SerializableMixin, metaclass=ModelMeta):
 
     def __repr__(self):
         return f"Product({self.name!r}, {self.price!r}, {self.quantity!r})"
+
+class ProductCalculator:
+
+    @staticmethod
+    def calculate_price(product: Product, discount: Optional[DiscountStrategy] = None) -> float | None:
+        if not discount:
+            return product.price
+        return discount.apply(product.price)
+
+    @staticmethod
+    def sell(product: Product, amount: int):
+        if product.quantity < amount:
+            raise InsufficientStockError(f'Не хватает {product.quantity - amount} товара на складе')
+        product.quantity = product.quantity - amount
+
+class ProductRepo:
+    def __init__(self, product: Product):
+        self.product = product
+
+    def save_to_database(self, database: Database):
+        database.save(self.product)
+        return True

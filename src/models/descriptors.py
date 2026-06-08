@@ -34,3 +34,4 @@ class CachedProperty:
         setattr(instance, cache_attr, value)
         print("Расчитываем и сохраняем в атрибут результат")
         return value
+

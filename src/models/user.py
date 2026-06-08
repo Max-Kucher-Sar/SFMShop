@@ -1,22 +1,15 @@
-import re
-from .exceptions import ValidationError
-from .metaclasses import ModelMeta
+from .mixins import LoggableMixin, SerializableMixin
+from .descriptors import PositiveNumber
 
-class User(metaclass=ModelMeta):
-    def __init__(self, name, email):
-        if not re.match(r".+@.+\..+", email):
-            raise ValidationError("Неверный формат email")
+class User(LoggableMixin, SerializableMixin):
+    balance = PositiveNumber("_balance")
 
+    def __init__(self, user_id, name, email, age, balance):
+        self.user_id = user_id
         self.name = name
-        self._email = email
-
-    def set_email(self, email):
-        if not re.match(r".+@.+\..+", email):
-            raise ValidationError("Неверный формат email")
-        self._email = email
-
-    def get_info(self):
-        return f"Пользователь: {self.name}, Email: {self._email}"
-
-    def get_email(self):
-        return f"Почта пользователя: {self._email}"
+        self.email = email
+        self.age = age
+        self.balance = balance
+        self.orders = []
+        self.is_active = True
+        self.log(f"Создан пользователь: {self.name}")

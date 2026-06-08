@@ -11,14 +11,6 @@ class PaymentValidator:
             raise ValueError("Неизвестный метод оплаты")
         return True
 
-class Database(ABC):
-    @abstractmethod
-    def save(self, payment: Payment):
-        pass
-
-class PostgreSQLDatabase(Database):
-    def save(self, payment: Payment):
-        print(f"Сохранение платежа {payment.order_id} в PostgreSQL")
 
 class PaymentRepo:
     def __init__(self, payment: Payment):
