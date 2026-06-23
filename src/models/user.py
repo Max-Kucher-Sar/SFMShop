@@ -13,3 +13,4 @@ class User(LoggableMixin, SerializableMixin):
         self.orders = []
         self.is_active = True
         self.log(f"Создан пользователь: {self.name}")
+

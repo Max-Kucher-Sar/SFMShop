@@ -1,7 +1,14 @@
-from models.order_factory import OrderFactory
-from models.delivery_strategy import StandardDelivery
-from models.payment import CardPayment
-from models.product import Product
+import sys
+import os
+
+# Добавляем корневую директорию проекта в sys.path для возможности запуска
+# как python src/main.py, так и python -m src.main из корня проекта
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+
+from src.models.order_factory import OrderFactory
+from src.models.delivery_strategy import StandardDelivery
+from src.models.payment import CardPayment
+from src.models.product import Product
 
 
 def process_advanced_order_system():
@@ -37,4 +44,15 @@ def process_advanced_order_system():
         "product": product.to_dict()
     }
 
-process_advanced_order_system()
+# process_advanced_order_system()
+from functools import reduce
+
+product_names = ["Ноутбук", "Мышь"]
+product_prices_dict = dict(
+    reduce(
+        lambda acc, item: acc + [(item[0], item[1])],
+        zip(product_names, [1000, 200]),
+        []
+    )
+)
+print(product_prices_dict)
