@@ -1,6 +1,22 @@
-from src.service.database_service import Database
-from .metaclasses import ModelMeta
+# from src.service.database_service import Database
+# from .metaclasses import ModelMeta
+class ModelMeta(type):
+    """Метакласс для автоматического добавления методов"""
+    _registry = {}
 
+    def __new__(cls, name, bases, attrs):
+        print(name, bases, attrs)
+        def to_dict(self):
+            return self.__dict__
+
+        attrs["to_dict"] = to_dict
+
+        new_class = super().__new__(cls, name, bases, attrs)
+
+        if name != "Model":
+            cls._registry[name] = new_class
+
+        return new_class
 class Order(metaclass=ModelMeta):
 
     def __init__(self, order_id, items, user):
@@ -37,20 +53,20 @@ class OrderCalculate:
     def calculate_total(order: Order) -> float:
         return sum(product.get_total_price() for product in order.items)
 
-class OrderRepo:
-    def __init__(self, order: Order):
-        self.order = order
+# class OrderRepo:
+#     def __init__(self, order: Order):
+#         self.order = order
 
-    def save_to_database(self, database: Database):
-        database.save(self.order)
-        return True
+#     def save_to_database(self, database: Database):
+#         database.save(self.order)
+#         return True
 
 # Использование
 order1 = Order(1, ["Ноутбук", "Мышь"], "Bob")
 order2 = Order(2, ["Клавиатура"], "Max")
 
-print(len(order1))  # 2
-print("Ноутбук" in order1)  # True
-order3 = order1 + order2  # Объединение заказов
-sorted_orders = sorted([order2, order1])
-print(len(order3))  # 3
+# print(len(order1))  # 2
+# print("Ноутбук" in order1)  # True
+# order3 = order1 + order2  # Объединение заказов
+# sorted_orders = sorted([order2, order1])
+# print(len(order3))  # 3

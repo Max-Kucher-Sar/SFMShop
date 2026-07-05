@@ -4,6 +4,7 @@ class ModelMeta(type):
     _registry = {}
 
     def __new__(cls, name, bases, attrs):
+        print(name, bases, attrs)
         def to_dict(self):
             return self.__dict__
 
