@@ -1,100 +1,83 @@
-from src.models.exceptions import (
-InsertError, UpdateError, SelectError, DeleteError
-)
+from .connection import get_connection
+import psycopg
 
-def create_order_items(conn, order_id, product_id, quantity, price):
-    try:
-        with conn:
+def create_order(user_id, product_id, quantity, total):
+    """Создание заказа с атомарными операциями"""
+    
+    with get_connection() as conn:
+        try:
             with conn.cursor() as cursor:
                 cursor.execute(
-                    "INSERT INTO order_items (order_id, product_id, quantity, price) VALUES (%s, %s, %s, %s)",
-                    (order_id, product_id, quantity, price)
+                    """INSERT INTO orders (user_id, product_id, total) VALUES (%s, %s, %s)""", 
+                    (user_id, product_id, total)) 
+
+                cursor.execute(
+                    "UPDATE products SET quantity = quantity - %s WHERE id = %s",
+                    (quantity, product_id)
                 )
-        return True
-    except Exception as e:
-        raise InsertError(f'Ошибка добавления записи в таблицу order_items: {e}')
 
-def get_orders_with_products(conn, user_id):
-    try:
-        with conn.cursor() as cursor:
-            cursor.execute(
-                """
-                SELECT orders.id as order_id,
-                products.name as product_name,
-                order_items.quantity as quantity,
-                order_items.price as price
-                FROM orders
-                INNER JOIN order_items ON order_items.order_id = orders.id
-                INNER JOIN products ON products.id = order_items.product_id
-                WHERE orders.user_id = %s
-                """, (user_id, )
-            )
-            result = cursor.fetchall()
-        return result
-    except Exception as e:
-        raise SelectError(f"Ошибка получения записи из таблицы orders по user_id = {user_id}: {e}")
+                total_quantity_stmt = cursor.execute(
+                    "SELECT quantity FROM products WHERE id = %s",
+                    (product_id, )
+                )
+                total_quantity = total_quantity_stmt.fetchone()
+                if total_quantity[0] < quantity:
+                    raise ValueError("Недостаточно товара")
+                
+            return "Заказ создан"
+        except psycopg.Error as e:
+            # Ошибка БД - rollback выполняется автоматически
+            conn.rollback()
+            print(f"Ошибка БД: {e}")
+            raise
+        except Exception as e:
+            conn.rollback()
+            print(f"Ошибка логики: {e}")
+            raise
 
-def get_user_order_history(conn, user_id):
-    try:
+def get_quantity_of_products(product_id):
+    with get_connection() as conn:
         with conn.cursor() as cursor:
-            cursor.execute(
-                """
-                SELECT 
-                orders.id,
-                products.name as product_name,
-                order_items.quantity as quantity
-                FROM users
-                INNER JOIN orders ON orders.user_id = users.id
-                INNER JOIN order_items ON order_items.order_id = orders.id
-                INNER JOIN products ON products.id = order_items.product_id
-                WHERE orders.user_id = %s
-                ORDER BY orders.created_at DESC
-                """,
-                (user_id,)
-            )
-            result = cursor.fetchall()
-        return result
-    except Exception as e:
-        raise SelectError(f"Ошибка получения записи из таблицы users по user_id = {user_id}: {e}")
+            res = cursor.execute("SELECT quantity FROM products WHERE id = %s", (product_id, ))
+            return res.fetchone()
+        
+def transfer_money(from_user_id, to_user_id, amount):
+    """Перевод денег от одного пользователя другому"""
+    with get_connection() as conn:
+        try:
+            with conn.cursor() as cursor:
+                #Проверяем достаточно ли денег на балансе пользователя с которого списываем
+                has_user_balance_stmt = cursor.execute(
+                    "SELECT balance FROM users WHERE id = %s",
+                    (from_user_id, )
+                )
+                has_user_balance = has_user_balance_stmt.fetchone()
+                if has_user_balance[0] < amount:
+                    raise ValueError("Недостаточно средств")
+                
+                #Переводим средства
+                cursor.execute(
+                    "UPDATE users SET balance = balance + %s WHERE id = %s",
+                    (amount, to_user_id)
+                )
+                #Списываем средства
+                cursor.execute(
+                    "UPDATE users SET balance = balance - %s WHERE id = %s",
+                    (amount, from_user_id)
+                )
+            return True
+        except psycopg.Error as e:
+            # Ошибка БД - rollback выполняется автоматически
+            conn.rollback()
+            print(f"Ошибка БД: {e}")
+            raise
+        except Exception as e:
+            conn.rollback()
+            print(f"Ошибка логики: {e}")
+            raise
 
-def get_order_statistics(conn):
-    try:
+def check_user_balance(user_id):
+    with get_connection() as conn:
         with conn.cursor() as cursor:
-            cursor.execute(
-                """
-                SELECT
-                user_id,
-                users.name,
-                COUNT(*) as order_count,
-                SUM(total)
-                FROM orders
-                INNER JOIN users on users.id = orders.user_id
-                GROUP BY user_id, users.name
-                ORDER BY user_id ASC
-                """
-            )
-            result = cursor.fetchall()
-        return result
-    except Exception as e:
-        raise SelectError(f"Ошибка получения записей из таблицы orders: {e}")
-
-def get_top_products(conn, limit=5):
-    try:
-        with conn.cursor() as cursor:
-            cursor.execute(
-                """
-                SELECT
-                name,
-                products.price,
-                SUM(order_items.quantity) as total_quantity
-                FROM products
-                INNER JOIN order_items on order_items.product_id = products.id
-                GROUP BY products.id
-                ORDER BY total_quantity DESC 
-                LIMIT %s
-                """, (limit, )
-            )
-            result = cursor.fetchall()
-        return result
-    except Exception as e:
-        raise SelectError(f"Ошибка получения записей из таблицы products: {e}")
+            res = cursor.execute("SELECT balance FROM users WHERE id = %s", (user_id, ))
+            return res.fetchone()

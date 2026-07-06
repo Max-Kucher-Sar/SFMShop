@@ -25,7 +25,7 @@ def get_connection():
     except Exception as e:
         if conn:
             conn.rollback()
-        print(f"Ошибка БД: {e}")
+        # print(f"Ошибка БД: {e}")
         raise
     finally:
         if conn:

@@ -1,39 +1,18 @@
 from database.connection import get_connection
+from database.queries import transfer_money, check_user_balance
+import psycopg2
 
+balance_before_res1 = check_user_balance(1)
+res1 = transfer_money(1, 3, 1000)
+balance_after_res1 = check_user_balance(1)
+balance_user3 = check_user_balance(3)
+print(f"Результат 1-й попытки: . Количество до: {balance_before_res1}, после: {balance_after_res1}. У пользователя 3: {balance_user3}")
 
-def create_tables():
-    with get_connection() as conn:
-        with conn.cursor() as cursor:
-            # Соаздание таблицы users
-            cursor.execute("""
-                CREATE TABLE IF NOT EXISTS users(
-                    id SERIAL PRIMARY KEY,
-                    name VARCHAR(100) NOT NULL,
-                    email VARCHAR(100) UNIQUE NOT NULL,
-                    balance DECIMAL(10, 2) NOT NULL DEFAULT 0,
-                    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-                );
-            """)
-            # Соаздание таблицы products
-            cursor.execute("""
-                CREATE TABLE IF NOT EXISTS products(
-                    id SERIAL PRIMARY KEY,
-                    name VARCHAR(200) NOT NULL,
-                    price DECIMAL(10,2) NOT NULL,
-                    quantity INTEGER DEFAULT 0,
-                    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-                );
-            """)
-            # Соаздание таблицы orders
-            cursor.execute("""
-                CREATE TABLE IF NOT EXISTS orders(
-                    id SERIAL PRIMARY KEY,
-                    user_id INTEGER REFERENCES users(id),
-                    product_id INTEGER REFERENCES products(id),
-                    total DECIMAL(10,2),
-                    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-                );
-            """)
-        print(f"Таблицы созданы")
-
-create_tables()
+balance_before_res2 = check_user_balance(2)
+try:
+    res2 = transfer_money(2, 3, 1000)
+except Exception as e:
+    pass
+balance_after_res2 = check_user_balance(2)
+balance_user3 = check_user_balance(3)
+print(f"Результат 2-й попытки (Должна быть ошибка что не хватает средств). Количество до: {balance_before_res2}, после: {balance_after_res2}. У пользователя 3: {balance_user3}")
