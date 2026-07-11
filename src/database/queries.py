@@ -156,3 +156,74 @@ def critical_financial_operation(user_from, user_to, amount):
             print(f"Попытка №{attempt}. Ошибка: {e}")
     print("Все попытки исчерпаны")
     return False
+
+def disgard_cash():
+    from psycopg import Connection
+    from .connection import DB_CONFIG
+
+    with Connection.connect(**DB_CONFIG) as conn:
+        conn.autocommit = True
+        with conn.cursor() as cursor:
+            cursor.execute("DISCARD ALL")
+    return True
+
+def measure_index_performance():
+    """
+    Измерение производительности с индексами и без.
+    Из-за малого количество записей Seq Scan быстрее, чем Index Scan.
+    Также влияет кэш, второй запрос выполняется быстрее.
+    """
+    import time
+    from random import randint, choice
+    try:
+        with get_connection() as conn:
+            with conn.cursor() as cursor:
+                # Создаем тестовые заказы для пользователя с id = 1
+                products_ids = [1, 2, 3, 4, 5]
+                for i in range(150):
+                    cursor.execute(
+                        "INSERT INTO orders (user_id, product_id, total) VALUES (%s, %s, %s)",
+                        (1, choice(products_ids), randint(100, 10000))
+                    )
+                conn.commit()
+
+                # Замер длля запроса без индекса для продукта с id = 2,
+                # тк если делать для user_id, то будет возврашать всю таблицу 
+                # и не будет наглядности в скорости выполнения
+                start = time.perf_counter()
+                res = cursor.execute(
+                    "SELECT SUM(total) FROM orders WHERE product_id = %s",
+                    (2, )
+                )
+                total_sum_whithout = res.fetchone()[0]
+                total_time_whithout = time.perf_counter() - start
+                print(f"Время запроса без индекса: {total_time_whithout:.4f}. Результат: {total_sum_whithout}")
+
+                #Сбрасываем кэш
+                disgard_cash()
+
+                # Создаем индекс по product_id
+                cursor.execute(
+                    f"CREATE INDEX IF NOT EXISTS idx_orders_product_id  ON orders (product_id)"
+                )
+                conn.commit()
+
+                # Замер запроса с индексов
+                start = time.perf_counter()
+                res = cursor.execute(
+                    "SELECT SUM(total) FROM orders WHERE product_id = %s",
+                    (2, )
+                )
+                total_sum = res.fetchone()[0]
+                total_time = time.perf_counter() - start
+                print(f"Время запроса без индекса: {total_time:.4f}. Результат: {total_sum}")
+
+                # Вычисляем коэффициент ускорения
+                speed_rate = total_time_whithout / total_time
+                print(f"Ускорение равно = {speed_rate:.4f}")
+            return True 
+    except Exception as e:
+        print(f"Ошибка при замере разницы с индексом/без: {e}")
+        return False
+
+
