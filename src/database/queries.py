@@ -1,5 +1,6 @@
 from .connection import get_connection
 import psycopg
+from psycopg import IsolationLevel
 
 def create_order(user_id, product_id, quantity, total):
     """Создание заказа с атомарными операциями"""
@@ -81,3 +82,77 @@ def check_user_balance(user_id):
         with conn.cursor() as cursor:
             res = cursor.execute("SELECT balance FROM users WHERE id = %s", (user_id, ))
             return res.fetchone()
+        
+def read_user_balance(user_id):
+    """
+    В данных фукнции используется READ_COMMITTED уровень изоляции.
+    По скольку в других транзакциях может изменяться баланс пользователя.
+    READ_COMMITTED - позволяет читать данные которые были записаны до начала текущей транзации.
+    """
+    with get_connection() as conn:
+        conn.set_isolation_level(IsolationLevel.READ_COMMITTED)
+        with conn.cursor() as cursor:
+            res = cursor.execute("SELECT balance FROM users WHERE id = %s", (user_id, ))
+            return res.fetchone()
+        
+def calculate_total_revenue(product_id):
+    """
+    В данных фукнции используется REPEATABLE READ уровень изоляции.
+    REPEATABLE READ позволяет читать данные вне зависимости от того,
+    что другие транзакции могут изменять эти строки.
+    """
+    with get_connection() as conn:
+        conn.set_isolation_level(IsolationLevel.REPEATABLE_READ)
+        with conn.cursor() as cursor:
+            # Количество заказов определенного продукта
+            res = cursor.execute("SELECT COUNT(product_id) FROM orders WHERE product_id = %s", (product_id, ))
+            count_orders_product = res.fetchone()[0]
+
+            #Общая сумма заказов этого продукта
+            res = cursor.execute("SELECT SUM(total) FROM orders WHERE product_id = %s", (product_id, ))
+            total_price_ordered_products = res.fetchall()[0][0]
+
+            return {"count": count_orders_product, "price_total" : float(total_price_ordered_products)}
+        
+def critical_financial_operation(user_from, user_to, amount):
+    """
+    В данной фукнции реализована критическая финансовая операция.
+    Пользователь 1 переводит деньги пользователю 2.
+    Нужно изолировать транзакцию от других.
+    Уровень изоляции SERIALIZABLE с retry-логикой
+    """
+    import time
+    MAX_RETRIES = 3
+    RETRY_DELAY = 0.5
+    for attempt in range(MAX_RETRIES + 1): 
+        try:
+            with get_connection() as conn:
+                conn.set_isolation_level(IsolationLevel.SERIALIZABLE)
+                with conn.cursor() as cursor:
+                    res = cursor.execute("SELECT balance FROM users WHERE id = %s", (user_from, ))
+                    balance_user_from = res.fetchone()[0]
+                    if balance_user_from < amount:
+                        raise ValueError(f"Недостаточно средств у id = {user_from}")
+                    
+                    res = cursor.execute("SELECT * FROM users WHERE id = %s", (user_to, ))
+                    user_to_exist = res.fetchone()
+                    if not user_to_exist:
+                        raise ValueError(f"Пользователь с id = {user_to} не существует")
+                    
+                    #Списание денег
+                    cursor.execute("UPDATE users SET balance = balance - %s WHERE id = %s", (amount, user_from))
+
+                    #Начисление
+                    cursor.execute("UPDATE users SET balance = balance + %s WHERE id = %s", (amount, user_to))
+            print("Перевод успешно совершен!")
+            return True
+            
+        except psycopg.errors.SerializationFailure as e:
+            last_error = e
+            print(f"Попытка №{attempt}. Ошибка SERIALIZABLE: {e}")
+            if attempt < MAX_RETRIES:
+                time.sleep(RETRY_DELAY)
+        except Exception as e:
+            print(f"Попытка №{attempt}. Ошибка: {e}")
+    print("Все попытки исчерпаны")
+    return False
